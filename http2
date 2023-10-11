@@ -38,7 +38,7 @@ def do_attack(target_url):
     response.close()
 
 def main():
-    target_url = "https://www.portalgrupo.com"
+    target_url = "https://www.example.com"
     number_of_requests = 100000
 
     try:
